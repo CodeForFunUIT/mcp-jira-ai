@@ -1,0 +1,49 @@
+import fs from "fs/promises";
+import path from "path";
+import { pathToFileURL } from "url";
+export async function loadProjectPlugins(server, projectRoot) {
+    const pluginDir = path.join(projectRoot, ".mcp-plugins");
+    try {
+        await fs.access(pluginDir);
+    }
+    catch {
+        // No plugins folder, nothing to do
+        return;
+    }
+    const files = (await fs.readdir(pluginDir)).filter(f => f.endsWith(".plugin.js") || f.endsWith(".plugin.mjs"));
+    for (const file of files) {
+        const filePath = path.join(pluginDir, file);
+        const fileUrl = pathToFileURL(filePath).href;
+        try {
+            const plugin = (await import(fileUrl)).default;
+            if (plugin.registerTools) {
+                plugin.registerTools(server);
+            }
+            if (plugin.registerPrompts) {
+                plugin.registerPrompts(server);
+            }
+            if (plugin.registerResources) {
+                plugin.registerResources(server);
+            }
+            console.error(`📦 Plugin loaded: ${plugin.name} v${plugin.version} từ ${file}`);
+        }
+        catch (err) {
+            console.error(`❌ Failed to load plugin ${file}:`, err);
+        }
+    }
+}
+// ── Tool registration ──────────────────────────
+// Để AI có thể scan và load plugins mới khi đang chạy
+export function registerPluginTools(server) {
+    server.tool("reload_plugins", "Scan và load lại plugins từ folder `.mcp-plugins/` trong project root. " +
+        "Dùng khi bạn vừa tạo thêm tool mới trong plugin.", {
+        projectRoot: z.string().describe("Đường dẫn project root"),
+    }, async ({ projectRoot }) => {
+        await loadProjectPlugins(server, projectRoot);
+        return {
+            content: [{ type: "text", text: "✅ Đã scan và reload plugins từ project." }],
+        };
+    });
+}
+import { z } from "zod";
+//# sourceMappingURL=loader.js.map
