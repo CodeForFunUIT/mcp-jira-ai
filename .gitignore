@@ -2,5 +2,3 @@ node_modules/
 build/
 *.log
 .env*
-/.dist
-.agent/

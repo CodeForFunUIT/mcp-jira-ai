@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VNPT Dev Agent — Workflow Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f1a;--bg-card:#111827;--bg-card-hover:#1a2236;
+  --border:#1e293b;--border-accent:#3b82f6;
+  --text:#e2e8f0;--text-muted:#94a3b8;--text-heading:#f8fafc;
+  --blue:#3b82f6;--blue-glow:rgba(59,130,246,.15);
+  --cyan:#22d3ee;--green:#34d399;--amber:#fbbf24;--rose:#fb7185;--violet:#a78bfa;
+  --font-body:'IBM Plex Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:12px;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+
+/* scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* layout */
+.container{max-width:960px;margin:0 auto;padding:0 24px}
+
+/* hero */
+.hero{position:relative;padding:100px 0 60px;text-align:center;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 600px 400px at 50% 0%,var(--blue-glow),transparent);pointer-events:none}
+.hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:700;color:var(--text-heading);letter-spacing:-.02em;position:relative}
+.hero h1 span{background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero .subtitle{font-size:1.1rem;color:var(--text-muted);max-width:600px;margin:16px auto 0;position:relative}
+
+/* phase strip */
+.phase-strip{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:40px 0 0;position:relative}
+.phase-strip .chip{padding:8px 18px;border-radius:99px;font-size:.8rem;font-weight:600;font-family:var(--font-mono);border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);transition:all .25s}
+.phase-strip .chip:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-glow);cursor:pointer}
+.phase-strip .arrow{color:var(--text-muted);display:flex;align-items:center;font-size:.75rem}
+
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:rgba(10,15,26,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 0}
+nav .inner{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+nav .inner::-webkit-scrollbar{display:none}
+nav a{padding:6px 16px;border-radius:8px;font-size:.82rem;font-weight:500;color:var(--text-muted);text-decoration:none;white-space:nowrap;transition:all .2s}
+nav a:hover,nav a.active{color:var(--blue);background:var(--blue-glow)}
+
+/* sections */
+section{padding:60px 0 40px}
+section h2{font-size:1.6rem;font-weight:700;color:var(--text-heading);margin-bottom:6px;display:flex;align-items:center;gap:12px}
+section h2 .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.section-desc{color:var(--text-muted);margin-bottom:32px;font-size:.95rem}
+
+/* cards */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:border-color .25s,box-shadow .25s}
+.card:hover{border-color:var(--border-accent);box-shadow:0 0 24px var(--blue-glow)}
+.card h3{font-size:1.05rem;font-weight:600;color:var(--text-heading);margin-bottom:8px}
+.card p{color:var(--text-muted);font-size:.9rem}
+
+/* tool table */
+.tool-table{width:100%;border-collapse:collapse;font-size:.88rem;margin:16px 0}
+.tool-table th{text-align:left;padding:10px 14px;background:var(--bg-card);color:var(--text-muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.tool-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.tool-table tr:hover td{background:var(--bg-card-hover)}
+.tool-name{font-family:var(--font-mono);color:var(--cyan);font-size:.82rem;font-weight:500}
+
+/* code block */
+.code-block{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:16px 20px;font-family:var(--font-mono);font-size:.85rem;color:var(--green);overflow-x:auto;margin:12px 0;line-height:1.8}
+
+/* warning box */
+.warn-table{width:100%;border-collapse:collapse;font-size:.88rem;margin:12px 0}
+.warn-table td,.warn-table th{padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.warn-table th{color:var(--amber);font-weight:600;font-size:.78rem;text-transform:uppercase}
+
+/* tag */
+.tag{display:inline-block;padding:2px 10px;border-radius:6px;font-size:.72rem;font-weight:600;font-family:var(--font-mono);margin-right:4px}
+.tag-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.tag-green{background:rgba(52,211,153,.15);color:var(--green)}
+.tag-amber{background:rgba(251,191,36,.15);color:var(--amber)}
+.tag-rose{background:rgba(251,113,133,.15);color:var(--rose)}
+.tag-violet{background:rgba(167,139,250,.15);color:var(--violet)}
+
+/* flow */
+.flow{display:flex;flex-direction:column;gap:2px;margin:20px 0}
+.flow-step{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;transition:all .2s}
+.flow-step:hover{border-color:var(--blue);transform:translateX(4px)}
+.flow-num{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex-shrink:0}
+.flow-text{font-size:.88rem}
+.flow-text code{font-family:var(--font-mono);color:var(--cyan);font-size:.82rem}
+.flow-text .desc{color:var(--text-muted);font-size:.82rem;margin-left:6px}
+.flow-arrow{text-align:center;color:var(--text-muted);font-size:.7rem;letter-spacing:.1em}
+
+/* prompt cards */
+.prompt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:20px 0}
+.prompt-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:all .25s}
+.prompt-card:hover{border-color:var(--violet);box-shadow:0 0 20px rgba(167,139,250,.12);transform:translateY(-2px)}
+.prompt-card .name{font-family:var(--font-mono);color:var(--violet);font-weight:600;font-size:.95rem;margin-bottom:6px}
+.prompt-card .use{font-size:.8rem;color:var(--text-muted)}
+
+/* tips */
+.tip{display:flex;gap:14px;padding:16px 20px;background:var(--bg-card);border-left:3px solid var(--blue);border-radius:0 var(--radius) var(--radius) 0;margin-bottom:12px}
+.tip-num{font-size:1.2rem;font-weight:700;color:var(--blue);flex-shrink:0}
+.tip-body{font-size:.9rem}
+.tip-body strong{color:var(--text-heading)}
+
+/* divider */
+.divider{border:none;border-top:1px solid var(--border);margin:0}
+
+/* footer */
+footer{text-align:center;padding:40px 0;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border)}
+
+/* responsive */
+@media(max-width:640px){
+  .hero{padding:60px 0 40px}
+  section{padding:40px 0 24px}
+  .phase-strip .arrow{display:none}
+  .prompt-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container">
+    <h1>Workflow Guide<br><span>vnpt-dev-agent MCP</span></h1>
+    <p class="subtitle">Hướng dẫn sử dụng MCP Server theo đúng thứ tự để xây dựng context đầy đủ nhất, giúp AI hoàn thành task nhanh và chính xác nhất.</p>
+    <div class="phase-strip">
+      <a class="chip" href="#phase1">Khởi tạo</a><span class="arrow">→</span>
+      <a class="chip" href="#phase2">Thu thập Context</a><span class="arrow">→</span>
+      <a class="chip" href="#phase3">Implement</a><span class="arrow">→</span>
+      <a class="chip" href="#phase4">Review &amp; Close</a><span class="arrow">→</span>
+      <a class="chip" href="#phase5">Học hỏi</a>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav><div class="container"><div class="inner">
+  <a href="#phase1">1. Khởi tạo</a>
+  <a href="#phase2">2. Context</a>
+  <a href="#phase3">3. Implement</a>
+  <a href="#phase4">4. Close</a>
+  <a href="#phase5">5. Học hỏi</a>
+  <a href="#quick">Tóm tắt</a>
+  <a href="#prompts">Prompts</a>
+  <a href="#tips">Tips</a>
+</div></div></nav>
+
+<main class="container">
+
+<!-- PHASE 1 -->
+<section id="phase1">
+  <h2><span class="icon" style="background:rgba(59,130,246,.15);color:var(--blue)">01</span> Khởi tạo task</h2>
+  <p class="section-desc">AI hiểu bạn muốn làm gì, task nào, ở đâu.</p>
+
+  <div class="card">
+    <h3>Cách nhanh nhất <span class="tag tag-green">Khuyến nghị</span></h3>
+    <p>Chỉ cần nói một câu duy nhất:</p>
+    <div class="code-block">Làm task GOCONNECT-1260</div>
+    <p>AI sẽ tự gọi <code class="tool-name">task_kickoff</code> → hỏi bạn 4 câu hỏi:</p>
+    <table class="tool-table">
+      <tr><td><strong>1. Mục tiêu</strong></td><td>Implement đầy đủ hay chỉ phân tích?</td></tr>
+      <tr><td><strong>2. Description</strong></td><td>Cần bổ sung GWT hay dùng luôn?</td></tr>
+      <tr><td><strong>3. Nhánh git</strong></td><td>Tạo mới hay dùng nhánh có sẵn?</td></tr>
+      <tr><td><strong>4. Project root</strong></td><td>Đường dẫn codebase (nếu chưa cung cấp)</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Cách thay thế <span class="tag tag-violet">Prompt có sẵn</span></h3>
+    <div class="code-block">/implement-task issueKey=GOCONNECT-1260 projectRoot=D:/projects/goconnect</div>
+  </div>
+
+  <div class="card">
+    <h3>Cảnh báo tự động <span class="tag tag-amber">Auto-detect</span></h3>
+    <table class="warn-table">
+      <tr><th>Loại</th><th>Điều kiện</th></tr>
+      <tr><td><span class="tag tag-rose">Drift risk</span></td><td>Task &gt; 14 ngày + comments thay đổi requirement</td></tr>
+      <tr><td><span class="tag tag-amber">Security</span></td><td>Description chứa keywords auth/token/password</td></tr>
+      <tr><td><span class="tag tag-violet">Poor desc</span></td><td>Thiếu sections chuẩn (&lt; 4/6) hoặc 0 scenarios</td></tr>
+    </table>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PHASE 2 -->
+<section id="phase2">
+  <h2><span class="icon" style="background:rgba(34,211,238,.15);color:var(--cyan)">02</span> Thu thập context <span class="tag tag-rose">QUAN TRỌNG NHẤT</span></h2>
+  <p class="section-desc">Cung cấp cho AI toàn bộ kiến thức cần thiết TRƯỚC KHI code. Càng nhiều context chính xác → AI code càng đúng.</p>
+
+  <h3 style="color:var(--text-heading);margin:20px 0 8px">2.1 — Hiểu dự án <span class="tag tag-blue">Lần đầu</span></h3>
+  <table class="tool-table">
+    <tr><th>#</th><th>Tool</th><th>Mục đích</th><th>Bỏ qua khi</th></tr>
+    <tr><td>1</td><td><span class="tool-name">scan_project_docs</span></td><td>Quét docs dự án → biết có tài liệu gì</td><td>Đã biết rõ dự án</td></tr>
+    <tr><td>2</td><td><span class="tool-name">read_project_doc</span></td><td>Đọc architecture, code standards</td><td>Đã đọc trước đó</td></tr>
+    <tr><td>3</td><td><span class="tool-name">get_team_context</span></td><td>Inject tribal knowledge</td><td>TEAM_CONTEXT.md chưa có</td></tr>
+    <tr><td>4</td><td><span class="tool-name">get_shared_knowledge</span></td><td>Check kiến thức cross-project</td><td>Chỉ có 1 project</td></tr>
+  </table>
+
+  <h3 style="color:var(--text-heading);margin:20px 0 8px">2.2 — Hiểu task</h3>
+  <table class="tool-table">
+    <tr><th>#</th><th>Tool</th><th>Mục đích</th><th>Bỏ qua khi</th></tr>
+    <tr><td>5</td><td><span class="tool-name">parse_description</span></td><td>Parse → structured data</td><td>Description quá ngắn</td></tr>
+    <tr><td>6a</td><td><span class="tool-name">generate_gwt_description</span></td><td>AI sinh lại description chuẩn GWT</td><td>Description đã tốt</td></tr>
+    <tr><td>6b</td><td><span class="tool-name">check_format_compliance</span></td><td>Chấm điểm description (A-F)</td><td>Không cần cải thiện</td></tr>
+  </table>
+
+  <h3 style="color:var(--text-heading);margin:20px 0 8px">2.3 — Hiểu code</h3>
+  <table class="tool-table">
+    <tr><th>#</th><th>Tool</th><th>Mục đích</th><th>Bỏ qua khi</th></tr>
+    <tr><td>7</td><td><span class="tool-name">detect_files_from_task</span></td><td>Tìm file liên quan tự động</td><td>Biết chính xác file cần sửa</td></tr>
+    <tr><td>8</td><td><span class="tool-name">rank_context_files</span></td><td>Semantic-rank nếu quá nhiều file</td><td>≤ 5 files</td></tr>
+  </table>
+
+  <h3 style="color:var(--text-heading);margin:20px 0 8px">2.4 — Đánh giá rủi ro</h3>
+  <table class="tool-table">
+    <tr><th>#</th><th>Tool</th><th>Mục đích</th><th>Bỏ qua khi</th></tr>
+    <tr><td>9</td><td><span class="tool-name">check_security_flag</span></td><td>Phát hiện vùng nhạy cảm</td><td>UI thuần, không auth</td></tr>
+    <tr><td>10</td><td><span class="tool-name">security_review_checklist</span></td><td>Sinh checklist bảo mật</td><td>Flag ≠ CRITICAL/HIGH</td></tr>
+    <tr><td>11</td><td><span class="tool-name">evaluate_task_complexity</span></td><td>Đánh giá effort, rủi ro</td><td>Task rất đơn giản</td></tr>
+    <tr><td>12</td><td><span class="tool-name">analyze_impact</span></td><td>File bị sửa → ai ảnh hưởng</td><td>Sửa ≤ 1 file</td></tr>
+    <tr><td>13</td><td><span class="tool-name">suggest_estimation</span></td><td>Ước tính giờ từ metrics</td><td>Chưa có data</td></tr>
+  </table>
+</section>
+
+<hr class="divider">
+
+<!-- PHASE 3 -->
+<section id="phase3">
+  <h2><span class="icon" style="background:rgba(52,211,153,.15);color:var(--green)">03</span> Implement</h2>
+  <p class="section-desc">Viết code với full context đã thu thập.</p>
+  <div class="flow">
+    <div class="flow-step"><span class="flow-num">1</span><span class="flow-text"><code>get_git_standard</code><span class="desc">Đọc quy chuẩn Git</span></span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="flow-num">2</span><span class="flow-text"><code>suggest_branch_name</code><span class="desc">Gợi ý tên branch chuẩn</span></span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step" style="border-color:var(--green)"><span class="flow-num" style="background:var(--green)">3</span><span class="flow-text"><strong style="color:var(--green)">IMPLEMENT CODE</strong><span class="desc">AI viết code dựa trên context</span></span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="flow-num">4</span><span class="flow-text"><code>check_quality_gate</code><span class="desc">Lint + Build + Test → PASS/BLOCKED</span></span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="flow-num">5</span><span class="flow-text"><code>suggest_commit_message</code><span class="desc">Conventional Commits</span></span></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PHASE 4 -->
+<section id="phase4">
+  <h2><span class="icon" style="background:rgba(251,191,36,.15);color:var(--amber)">04</span> Review &amp; Close</h2>
+  <p class="section-desc">Tạo PR, logwork, đóng task trên Jira.</p>
+  <div class="flow">
+    <div class="flow-step"><span class="flow-num">1</span><span class="flow-text"><code>generate_pr_description</code><span class="desc">Sinh PR từ Jira + git diff</span></span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="flow-num">2</span><span class="flow-text"><code>generate_worklog</code><span class="desc">Sinh nội dung logwork</span></span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="flow-num">3</span><span class="flow-text"><code>log_work</code><span class="desc">Submit logwork lên Jira</span></span></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-step"><span class="flow-num">4</span><span class="flow-text"><code>update_issue_status</code><span class="desc">Done + Resolution + Comment</span></span></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>Hoặc dùng prompt 1 lệnh</h3>
+    <div class="code-block">/close-task issueKey=GOCONNECT-1260 timeSpent=2h projectRoot=D:/projects/goconnect</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PHASE 5 -->
+<section id="phase5">
+  <h2><span class="icon" style="background:rgba(167,139,250,.15);color:var(--violet)">05</span> Học hỏi &amp; Lưu context</h2>
+  <p class="section-desc">Hệ thống cải thiện theo thời gian.</p>
+  <table class="tool-table">
+    <tr><th>#</th><th>Tool</th><th>Mục đích</th></tr>
+    <tr><td>1</td><td><span class="tool-name">submit_task_feedback</span></td><td>Ghi nhận: AI code tốt/kém, file hữu ích, gì cần cải thiện</td></tr>
+    <tr><td>2</td><td><span class="tool-name">track_metric</span></td><td>Track cycle time, AI revision count, estimation accuracy</td></tr>
+    <tr><td>3</td><td><span class="tool-name">save_session</span></td><td>Lưu context cho phiên chat sau</td></tr>
+    <tr><td>4</td><td><span class="tool-name">contribute_knowledge</span></td><td>Chia sẻ gotcha/pattern cho project khác</td></tr>
+  </table>
+  <div class="card" style="margin-top:16px;border-left:3px solid var(--violet)">
+    <p><strong>Tip:</strong> Quay lại task đã lưu? Nói: <span style="color:var(--cyan);font-family:var(--font-mono)">"tiếp tục GOCONNECT-1260"</span> → AI gọi <code class="tool-name">load_session</code> tự động.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- QUICK SUMMARY -->
+<section id="quick">
+  <h2><span class="icon" style="background:rgba(59,130,246,.15);color:var(--blue)">⚡</span> Tóm tắt nhanh</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:20px">
+    <div class="card" style="border-color:var(--green)">
+      <h3 style="color:var(--green)">Workflow tối thiểu (5 phút)</h3>
+      <div class="code-block" style="color:var(--green)">1. task_kickoff
+2. get_team_context
+3. detect_files_from_task
+4. suggest_branch_name
+5. → IMPLEMENT!</div>
+    </div>
+    <div class="card" style="border-color:var(--blue)">
+      <h3 style="color:var(--blue)">Workflow đầy đủ (18 bước)</h3>
+      <div class="code-block" style="color:var(--cyan);font-size:.78rem"> 1. task_kickoff
+ 2. scan_project_docs
+ 3. read_project_doc
+ 4. get_team_context
+ 5. get_shared_knowledge
+ 6. parse_description
+ 7. check_security_flag
+ 8. evaluate_task_complexity
+ 9. detect_files_from_task
+10. analyze_impact
+11. suggest_branch_name
+12. → IMPLEMENT
+13. check_quality_gate
+14. suggest_commit_message
+15. generate_pr_description
+16. generate_worklog + log_work
+17. update_issue_status
+18. feedback + track_metric</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PROMPTS -->
+<section id="prompts">
+  <h2><span class="icon" style="background:rgba(167,139,250,.15);color:var(--violet)">⌘</span> 4 Prompts có sẵn</h2>
+  <p class="section-desc">One-click workflows — chỉ cần 1 lệnh.</p>
+  <div class="prompt-grid">
+    <div class="prompt-card"><div class="name">/start</div><div class="use">Bắt đầu ngày mới, xem danh sách task</div></div>
+    <div class="prompt-card"><div class="name">/implement-task</div><div class="use">Implement từ A-Z</div></div>
+    <div class="prompt-card"><div class="name">/review-code</div><div class="use">Review code trước PR</div></div>
+    <div class="prompt-card"><div class="name">/close-task</div><div class="use">Đóng task sau khi merge</div></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- TIPS -->
+<section id="tips">
+  <h2><span class="icon" style="background:rgba(251,191,36,.15);color:var(--amber)">💡</span> Tips để AI hiệu quả nhất</h2>
+  <div style="margin-top:20px">
+    <div class="tip"><span class="tip-num">1</span><div class="tip-body"><strong>Luôn cung cấp projectRoot</strong> — Không có đường dẫn codebase, AI không thể tìm file context. <code class="tool-name">detect_files_from_task</code>, <code class="tool-name">analyze_impact</code>, <code class="tool-name">check_quality_gate</code> đều cần.</div></div>
+    <div class="tip"><span class="tip-num">2</span><div class="tip-body"><strong>Maintain TEAM_CONTEXT.md</strong> — Mỗi khi phát hiện gotcha mới, dùng <code class="tool-name">update_team_context</code>. AI sẽ tham khảo file này ở mọi task sau.</div></div>
+    <div class="tip"><span class="tip-num">3</span><div class="tip-body"><strong>Đừng bỏ qua thu thập context</strong> — Context = chất lượng output. Nếu AI code sai, 80% là do thiếu context, không phải AI kém.</div></div>
+    <div class="tip"><span class="tip-num">4</span><div class="tip-body"><strong>Dùng save_session khi nghỉ</strong> — Context giữa các phiên chat sẽ mất nếu không lưu. Gọi <code class="tool-name">save_session</code> trước khi đóng chat.</div></div>
+    <div class="tip"><span class="tip-num">5</span><div class="tip-body"><strong>Feedback là vòng lặp cải thiện</strong> — <code class="tool-name">submit_task_feedback</code> giúp phát hiện patterns (VD: "AI luôn quên loading state") → AI tự sửa ở task sau.</div></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>vnpt-dev-agent MCP Server — ~45 tools · 4 prompts · 3 resources · 27 modules</p>
+    <p style="margin-top:4px;font-size:.75rem">Built with TypeScript · Powered by Model Context Protocol</p>
+  </div>
+</footer>
+
+<script>
+// Sticky nav active state
+const sections=document.querySelectorAll('section[id]');
+const navLinks=document.querySelectorAll('nav a');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const id=e.target.id;
+      const link=document.querySelector(`nav a[href="#${id}"]`);
+      if(link)link.classList.add('active');
+    }
+  });
+},{rootMargin:'-80px 0px -60% 0px',threshold:0});
+sections.forEach(s=>observer.observe(s));
+
+// Smooth reveal on scroll
+const cards=document.querySelectorAll('.card,.flow-step,.tip,.prompt-card');
+const revealObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';revealObs.unobserve(e.target)}
+  });
+},{threshold:.1});
+cards.forEach(c=>{c.style.opacity='0';c.style.transform='translateY(16px)';c.style.transition='opacity .5s,transform .5s';revealObs.observe(c)});
+</script>
+</body>
+</html>
