@@ -436,7 +436,7 @@ export class JiraClient {
             .map(s => `  • "${s.label}"`);
         throw new Error(`[${fieldLabel}] Không tìm thấy option khớp với "${input}".\n` +
             `Gợi ý gần nhất:\n${topSuggestions.join("\n")}\n` +
-            `Dùng get_create_meta để xem đầy đủ danh sách.`);
+            `Dùng create_issue({ dryRun: true }) để xem đầy đủ danh sách.`);
     }
     // ─── USERS & EPICS ─────────────────────────
     /**
@@ -504,7 +504,7 @@ export class JiraClient {
             .map(x => `  • "${x.u.name}" → ${x.u.displayName} (${x.u.emailAddress || "no email"})`);
         throw new Error(`Không tìm thấy user khớp với "${input}".\n` +
             `Gợi ý gần nhất:\n${suggestions.join("\n")}\n` +
-            `Dùng get_create_meta để xem đầy đủ danh sách.`);
+            `Dùng create_issue({ dryRun: true }) để xem đầy đủ danh sách.`);
     }
     /**
      * Fuzzy-resolve Epic key từ danh sách epics đang mở.
@@ -535,7 +535,7 @@ export class JiraClient {
             .map(x => `  • ${x.e.key} → "${x.e.fields.summary}" [${x.e.fields.status.name}]`);
         throw new Error(`Không tìm thấy Epic khớp với "${input}".\n` +
             `Gợi ý gần nhất:\n${suggestions.join("\n")}\n` +
-            `Dùng get_create_meta để xem đầy đủ danh sách.`);
+            `Dùng create_issue({ dryRun: true }) để xem đầy đủ danh sách.`);
     }
     /**
      * Tính độ tương đồng đơn giản giữa 2 chuỗi (0-1)

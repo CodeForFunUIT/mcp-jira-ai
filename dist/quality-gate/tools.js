@@ -12,7 +12,7 @@ const execAsync = promisify(exec);
 // ─────────────────────────────────────────────
 export function registerQualityGateTools(server) {
     server.tool("check_quality_gate", "Kiểm tra code quality trước khi close task: lint, build, test. " +
-        "Gọi TRƯỚC khi `update_issue_status` hoặc `generate_worklog`. " +
+        "Gọi TRƯỚC khi `update_issue` hoặc `generate_worklog`. " +
         "→ Tiếp: Nếu pass → `generate_worklog` → `close-task`.", {
         projectRoot: z.string().describe("Đường dẫn codebase"),
         stack: z.enum(["auto", "angular", "spring", "nestjs", "flutter", "react", "generic"])
@@ -101,7 +101,7 @@ export function registerQualityGateTools(server) {
             ].join("\n")));
         }
         else {
-            lines.push("## ✅ Gate PASSED", "Code sẵn sàng để close task!", "", "📌 **Next step:** `generate_worklog` → `log_work` → `update_issue_status`");
+            lines.push("## ✅ Gate PASSED", "Code sẵn sàng để close task!", "", "📌 **Next step:** `generate_worklog` → `log_work` → `update_issue`");
         }
         if (uncommittedCount > 0) {
             lines.push("", `⚠️ **Có ${uncommittedCount} file chưa commit.** Hãy commit trước khi tạo PR.`);

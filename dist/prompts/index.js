@@ -126,7 +126,7 @@ export function registerPrompts(server) {
                         "",
                         "## Bước 2: Status + Resolution + Comment",
                         "3. Hỏi user muốn chuyển sang trạng thái nào (VD: 'Resolved', 'Done')",
-                        `4. Gọi \`update_issue_status\` với:`,
+                        `4. Gọi \`update_issue\` với:`,
                         `   - \`resolution\`: "Done" (hoặc "Fixed" nếu là Bug)`,
                         `   - \`comment\`: Tóm tắt ngắn gọn những gì đã làm (VD: "Fix xong bug X, đã test trên staging")`,
                         "",

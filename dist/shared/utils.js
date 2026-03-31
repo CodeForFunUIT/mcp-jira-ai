@@ -54,10 +54,10 @@ export const TOOL_CHAINING = {
     security_review_checklist: "→ Tiếp: Implement với checklist này. Review kỹ trước khi tạo PR.",
     evaluate_task_complexity: "→ Tiếp: `task_kickoff` nếu quyết định làm, hoặc `create_issue` để chia subtask.",
     suggest_branch_name: "→ Tiếp: Tạo branch → bắt đầu implement → `suggest_commit_message` khi commit.",
-    suggest_commit_message: "→ Tiếp: Commit → `generate_worklog` → `log_work` → `update_issue_status`.",
-    generate_worklog: "→ Tiếp: Review nội dung → `log_work` để submit lên Jira.",
-    log_work: "→ Tiếp: `update_issue_status` → `submit_task_feedback` để hệ thống học hỏi.",
-    update_issue_status: "→ Tiếp: `submit_task_feedback` + `track_metric` để ghi nhận kết quả.",
+    suggest_commit_message: "→ Tiếp: Commit → `generate_worklog` → `log_work` → `update_issue`.",
+    generate_worklog: "→ Tiếp: Review nội dung → `log_work` để ghi nhận effort, hoặc `update_issue` để chuyển trạng thái / thêm comment.",
+    log_work: "→ Tiếp: `update_issue` để chuyển trạng thái task.",
+    update_issue: "→ Tiếp: `submit_task_feedback` + `track_metric` để ghi nhận kết quả.",
     get_git_standard: "→ Tiếp: `suggest_branch_name` hoặc `suggest_commit_message`.",
 };
 /**
