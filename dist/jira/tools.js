@@ -3,6 +3,17 @@ import { jiraClient } from "./client.js";
 import { formatIssueForAI, formatIssueListForAI } from "./formatter.js";
 import { withErrorHandler, getChainHint } from "../shared/index.js";
 import { getCurrentPat, updatePat, validatePat } from "./pat-manager.js";
+// Build JQL clause cho user filter dựa trên role và assignee
+function buildUserClause(role, assignee) {
+    if (assignee === "any")
+        return "";
+    const field = role === "reporter" ? "reporter"
+        : role === "watcher" ? "watcher" : "assignee";
+    if (assignee === "unassigned" && field === "assignee") {
+        return `${field} is EMPTY AND `;
+    }
+    return `${field} = ${assignee} AND `;
+}
 // ─────────────────────────────────────────────
 // registerJiraTools: đăng ký tất cả Jira tools
 //
@@ -13,15 +24,31 @@ import { getCurrentPat, updatePat, validatePat } from "./pat-manager.js";
 //   3. inputSchema → Validate input trước khi gọi API
 // ─────────────────────────────────────────────
 export function registerJiraTools(server) {
-    // ── TOOL 1: Lấy danh sách task của tôi ───────
-    server.tool("list_my_open_issues", "Lấy danh sách Jira issues được assign cho tôi, lọc theo trạng thái. " +
-        "statusFilter: 'open' (Open/To Do/Reopened), 'active' (In Progress), " +
-        "'done' (Đã xong), 'all' (tất cả trạng thái). Mặc định: 'open'. " +
-        "Trường hợp cần lọc tùy chỉnh: dùng customJql.", {
+    // ── TOOL 1: Lấy danh sách issues ─────────────
+    server.tool("list_issues", "Lấy danh sách Jira issues theo filter linh hoạt. " +
+        "Mặc định: issues được assign cho tôi, đang mở. " +
+        "Có thể lọc theo user khác (assigneeFilter), role (assignee/reporter/watcher), " +
+        "trạng thái (statusFilter), hoặc JQL tùy chỉnh (customJql = full override). " +
+        "Trước đây có tên list_my_open_issues.", {
         projectKey: z
             .string()
             .optional()
             .describe("Filter theo project key cụ thể, VD: 'VNPTAI'. Bỏ trống = tất cả project."),
+        assigneeFilter: z
+            .string()
+            .default("currentUser()")
+            .describe("User để filter. " +
+            "'currentUser()' = tôi (default). " +
+            "'unassigned' = chưa assign (chỉ với assignee role). " +
+            "'any' = bỏ qua filter user. " +
+            "Username cụ thể: 'nghiath', 'admin', v.v."),
+        roleFilter: z
+            .enum(["assignee", "reporter", "watcher"])
+            .default("assignee")
+            .describe("Role của user với issue. " +
+            "'assignee' = được assign (default). " +
+            "'reporter' = người tạo issue. " +
+            "'watcher' = người đang theo dõi."),
         statusFilter: z
             .enum(["open", "active", "done", "all"])
             .default("open")
@@ -33,14 +60,14 @@ export function registerJiraTools(server) {
         customJql: z
             .string()
             .optional()
-            .describe("JQL tùy chỉnh (ghi đè statusFilter). VD: 'status = \"In Review\" AND sprint in openSprints()'"),
+            .describe("JQL tùy chỉnh — full override, không inject thêm gì. VD: 'project = VNPTAI AND sprint in openSprints()'"),
         maxResults: z
             .number()
             .min(1)
             .max(50)
             .default(20)
             .describe("Số lượng tối đa issues trả về"),
-    }, withErrorHandler("list_my_open_issues", async ({ projectKey, statusFilter, customJql, maxResults }) => {
+    }, withErrorHandler("list_issues", async ({ projectKey, assigneeFilter, roleFilter, statusFilter, customJql, maxResults }) => {
         const projectFilter = projectKey ? `project = ${projectKey} AND ` : "";
         // Map statusFilter → JQL conditions
         const statusMap = {
@@ -51,31 +78,43 @@ export function registerJiraTools(server) {
         };
         let jql;
         if (customJql) {
-            jql = `${projectFilter}assignee = currentUser() AND ${customJql} ORDER BY updated DESC`;
+            // Full override — không inject gì thêm vào customJql
+            jql = `${projectFilter}${customJql} ORDER BY updated DESC`;
         }
         else {
-            jql = `${projectFilter}assignee = currentUser() AND ${statusMap[statusFilter]} ORDER BY priority DESC, updated DESC`;
+            const userClause = buildUserClause(roleFilter, assigneeFilter);
+            jql = `${projectFilter}${userClause}${statusMap[statusFilter]} ORDER BY priority DESC, updated DESC`;
         }
         const data = await jiraClient.searchIssues(jql, maxResults);
-        const filterLabel = {
+        // Build label mô tả filter đang dùng
+        const statusLabelMap = {
             open: "Open / To Do / Reopened",
             active: "In Progress",
             done: "Done / Resolved / Closed",
             all: "Tất cả trạng thái",
         };
-        const label = customJql ? `Custom: ${customJql}` : filterLabel[statusFilter];
+        const roleLabel = roleFilter === "assignee" ? "Assignee"
+            : roleFilter === "reporter" ? "Reporter" : "Watcher";
+        const userLabel = assigneeFilter === "currentUser()" ? "Tôi"
+            : assigneeFilter === "unassigned" ? "Chưa assign"
+                : assigneeFilter === "any" ? "Tất cả"
+                    : assigneeFilter;
+        const label = customJql
+            ? `Custom JQL: ${customJql}`
+            : `${roleLabel}: ${userLabel} | Status: ${statusLabelMap[statusFilter]}`;
         if (data.issues.length === 0) {
             return {
-                content: [{ type: "text", text: `✅ Không có issue nào (điều kiện: ${label}).` + getChainHint("list_my_open_issues") }],
+                content: [{ type: "text", text: `✅ Không có issue nào (điều kiện: ${label}).` + getChainHint("list_issues") }],
             };
         }
         return {
             content: [{
                     type: "text",
-                    text: `**Filter:** ${label}\n\n` + formatIssueListForAI(data.issues, data.total) + getChainHint("list_my_open_issues"),
+                    text: `**Filter:** ${label}\n\n` + formatIssueListForAI(data.issues, data.total) + getChainHint("list_issues"),
                 }],
         };
     }));
+    // ── TOOL 2: Lấy chi tiết 1 issue ─────────────
     server.tool("get_issue_detail", "Đọc toàn bộ thông tin chi tiết của 1 Jira issue: mô tả đầy đủ, " +
         "comments, sub-tasks, priority, status hiện tại. " +
         "Dùng trước khi phân tích hoặc implement một task cụ thể.", {
