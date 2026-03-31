@@ -76,10 +76,8 @@ Giao tiếp trực tiếp với Jira REST API. Gồm 3 file: `client.ts` (Jira A
 | `list_my_open_issues` | Lấy danh sách issues được assign, hỗ trợ filter (open/active/done/all) và customJql |
 | `get_issue_detail` | Đọc chi tiết 1 issue (auto-check drift bằng heuristics) |
 | `log_work` | Ghi nhận thời gian làm việc |
-| `update_issue_status` | Chuyển trạng thái + Resolution + Comment |
-| `get_available_transitions` | Xem các transition có thể dùng |
-| `add_comment` | Thêm comment vào issue |
-| `create_issue` | Tạo issue/sub-task mới với labels, priority |
+| `update_issue` | Chuyển trạng thái + comment + dryRun xem transitions |
+| `create_issue` | Tạo issue/sub-task mới + dryRun xem metadata |
 
 **Điểm đặc biệt:** `get_issue_detail` tự động tính **drift warning** (heuristic) — cảnh báo khi task cũ (>14 ngày), comments mới có keywords thay đổi requirement.
 
@@ -497,7 +495,7 @@ User: "Làm task VNPTAI-123"
       ▼
 [generate_worklog] ─── Sinh nội dung logwork
 [log_work] ─── Submit lên Jira
-[update_issue_status] ─── Chuyển Done + Resolution + Comment
+[update_issue] ─── Chuyển Done + Resolution + Comment
       │
       ▼
 [submit_task_feedback] ─── Ghi feedback để học hỏi

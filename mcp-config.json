@@ -36,7 +36,7 @@
   "safety": {
     "requireConfirmation": [
       "log_work",
-      "update_issue_status",
+      "update_issue",
       "create_issue",
       "submit_task_feedback",
       "track_metric",

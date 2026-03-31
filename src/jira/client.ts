@@ -574,7 +574,7 @@ export class JiraClient {
     throw new Error(
       `[${fieldLabel}] Không tìm thấy option khớp với "${input}".\n` +
       `Gợi ý gần nhất:\n${topSuggestions.join("\n")}\n` +
-      `Dùng get_create_meta để xem đầy đủ danh sách.`
+      `Dùng create_issue({ dryRun: true }) để xem đầy đủ danh sách.`
     );
   }
 
@@ -663,7 +663,7 @@ export class JiraClient {
     throw new Error(
       `Không tìm thấy user khớp với "${input}".\n` +
       `Gợi ý gần nhất:\n${suggestions.join("\n")}\n` +
-      `Dùng get_create_meta để xem đầy đủ danh sách.`
+      `Dùng create_issue({ dryRun: true }) để xem đầy đủ danh sách.`
     );
   }
 
@@ -701,7 +701,7 @@ export class JiraClient {
     throw new Error(
       `Không tìm thấy Epic khớp với "${input}".\n` +
       `Gợi ý gần nhất:\n${suggestions.join("\n")}\n` +
-      `Dùng get_create_meta để xem đầy đủ danh sách.`
+      `Dùng create_issue({ dryRun: true }) để xem đầy đủ danh sách.`
     );
   }
 

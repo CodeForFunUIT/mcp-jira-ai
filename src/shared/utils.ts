@@ -82,12 +82,12 @@ export const TOOL_CHAINING: Record<string, string> = {
   suggest_branch_name:
     "→ Tiếp: Tạo branch → bắt đầu implement → `suggest_commit_message` khi commit.",
   suggest_commit_message:
-    "→ Tiếp: Commit → `generate_worklog` → `log_work` → `update_issue_status`.",
+    "→ Tiếp: Commit → `generate_worklog` → `log_work` → `update_issue`.",
   generate_worklog:
-    "→ Tiếp: Review nội dung → `log_work` để submit lên Jira.",
+    "→ Tiếp: Review nội dung → `log_work` để ghi nhận effort, hoặc `update_issue` để chuyển trạng thái / thêm comment.",
   log_work:
-    "→ Tiếp: `update_issue_status` → `submit_task_feedback` để hệ thống học hỏi.",
-  update_issue_status:
+    "→ Tiếp: `update_issue` để chuyển trạng thái task.",
+  update_issue:
     "→ Tiếp: `submit_task_feedback` + `track_metric` để ghi nhận kết quả.",
   get_git_standard:
     "→ Tiếp: `suggest_branch_name` hoặc `suggest_commit_message`.",

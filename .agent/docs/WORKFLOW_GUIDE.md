@@ -155,7 +155,7 @@ check_quality_gate → suggest_commit_message → Commit
 ```
 generate_pr_description → Tạo PR
        ↓
-generate_worklog → log_work → update_issue_status (Done + Resolution + Comment)
+generate_worklog → log_work → update_issue (Done + Resolution + Comment)
 ```
 
 | # | Tool | Mục đích |
@@ -163,7 +163,7 @@ generate_worklog → log_work → update_issue_status (Done + Resolution + Comme
 | 1 | `generate_pr_description` | Sinh PR description từ Jira + git diff + commits |
 | 2 | `generate_worklog` | Sinh nội dung logwork từ checklist + files đã sửa |
 | 3 | `log_work` | Submit logwork lên Jira |
-| 4 | `update_issue_status` | Chuyển Done/Resolved + Resolution + Comment |
+| 4 | `update_issue` | Chuyển Done/Resolved + Resolution + Comment |
 
 ### Hoặc dùng prompt có sẵn
 
@@ -221,7 +221,7 @@ Nếu muốn nhanh nhất, chỉ cần 5 tool calls:
 14. suggest_commit_message    ← Commit chuẩn
 15. generate_pr_description   ← PR description
 16. generate_worklog + log_work ← Logwork
-17. update_issue_status       ← Close task
+17. update_issue              ← Close task
 18. submit_task_feedback + track_metric ← Learning loop
 ```
 

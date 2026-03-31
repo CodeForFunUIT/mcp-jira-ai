@@ -19,7 +19,7 @@ export function registerQualityGateTools(server: McpServer) {
   server.tool(
     "check_quality_gate",
     "Kiểm tra code quality trước khi close task: lint, build, test. " +
-    "Gọi TRƯỚC khi `update_issue_status` hoặc `generate_worklog`. " +
+    "Gọi TRƯỚC khi `update_issue` hoặc `generate_worklog`. " +
     "→ Tiếp: Nếu pass → `generate_worklog` → `close-task`.",
     {
       projectRoot: z.string().describe("Đường dẫn codebase"),
@@ -135,7 +135,7 @@ export function registerQualityGateTools(server: McpServer) {
           "## ✅ Gate PASSED",
           "Code sẵn sàng để close task!",
           "",
-          "📌 **Next step:** `generate_worklog` → `log_work` → `update_issue_status`",
+          "📌 **Next step:** `generate_worklog` → `log_work` → `update_issue`",
         );
       }
 
